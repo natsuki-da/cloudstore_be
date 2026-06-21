@@ -1,0 +1,33 @@
+name: Cloudstore CI pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/chechout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Run tests
+        run: mvn test --batch-mode --no-transfer-progress
+
+      - name: Build Docker image
+        run: docker build . -t cloudstore_backend:latest
+
+      - name: Tag image
+        run: docker tag cloudstore_backend:latest iidasson/cloudstore_backend:latest
+
+      - name: Push image
+        run: docker push iidasson/cloudstore_backend:latest
